@@ -57,15 +57,6 @@ public class InvitePlayer extends PlayerCommandMiddle{
 			s.sendMessage(ChatColor.RED + "The player has never played before.");
 			return true;
 		}
-		if (group.isCurrentMember(targetAccount)) { // So a player can't demote someone who is above them.
-			s.sendMessage(ChatColor.RED + "Player is already a member. "
-					+ "Use /promoteplayer to change their PlayerType.");
-			return true;
-		}
-		if(NameLayerPlugin.getBlackList().isBlacklisted(group, targetAccount)) {
-			s.sendMessage(ChatColor.RED + "This player is currently blacklisted, you have to unblacklist him with /removeblacklist before inviting him to the group");
-			return true;
-		}
 		final PlayerType pType = targetType != null ? PlayerType.getPlayerType(targetType) : PlayerType.MEMBERS;
 		if (pType == null) {
 			if (p != null) {
@@ -79,6 +70,7 @@ public class InvitePlayer extends PlayerCommandMiddle{
 			p.sendMessage(ChatColor.RED + "I think we both know that this shouldn't be possible.");
 			return true;
 		}
+		boolean allowed = false;
 		if (!isAdmin) {
 			// Perform access check
 			final UUID executor = p.getUniqueId();
@@ -87,7 +79,6 @@ public class InvitePlayer extends PlayerCommandMiddle{
 				s.sendMessage(ChatColor.RED + "You are not on that group.");
 				return true;
 			}
-			boolean allowed = false;
 			switch (pType) { // depending on the type the executor wants to add the player to
 				case MEMBERS:
 					allowed = gm.hasAccess(group, executor, PermissionType.getPermission("MEMBERS"));
@@ -109,6 +100,17 @@ public class InvitePlayer extends PlayerCommandMiddle{
 				s.sendMessage(ChatColor.RED + "You do not have permissions to modify this group.");
 				return true;
 			}
+		}		
+		if (group.isCurrentMember(targetAccount)) { // So a player can't demote someone who is above them.
+			s.sendMessage(ChatColor.RED + "Player is already a member. "
+					+ "Use /promoteplayer to change their PlayerType.");
+			return true;
+		}
+		if(NameLayerPlugin.getBlackList().isBlacklisted(group, targetAccount)) {
+			s.sendMessage(ChatColor.RED + "This player is currently blacklisted, you have to unblacklist him with /removeblacklist before inviting him to the group");
+			return true;
+		}
+		if (!isAdmin) {
 			sendInvitation(group, pType, targetAccount, p.getUniqueId(), true);
 		} else {
 			sendInvitation(group, pType, targetAccount, null, true);
